@@ -12,7 +12,7 @@ app.use(cors());
 // Create connection pool to PostgreSQL
 const pool = new Pool({
     host: 'localhost',
-    user: 'thanasis',
+    user: 'gni',
     // password: 'yourpassword',
     database: 'onions',
     port: 5432,
@@ -63,5 +63,5 @@ async function bookEvent(userAddress: string, eventId: number) {
     const reward = event.rows[0].reward;
     // TODO
     console.log(`rewardUser(${userAddress}, ${reward})`)
-    rewardUser(userAddress, reward);
+    await rewardUser(userAddress, reward);
 }

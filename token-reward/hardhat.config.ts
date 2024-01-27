@@ -9,12 +9,12 @@ import '@openzeppelin/hardhat-upgrades';
 
 dotenv.config();
 
-
-
 const config: HardhatUserConfig = {
   solidity: "0.8.9",
   networks: {
     columbus: {
+      //hardfork: "istanbul",
+      chainId: 501,
       url: process.env.COLUMBUS_URL || "",
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],

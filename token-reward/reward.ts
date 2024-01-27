@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import Web3 from 'web3';
 import path from 'path';
-import ethers from 'ethers';
+import { ethers } from 'ethers';
 
 dotenv.config();
 
@@ -23,11 +23,20 @@ const provider = new ethers.providers.JsonRpcProvider(NETWORK_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const rewardContract = new ethers.Contract(REWARD_CONTRACT_ADDRESS, rewardContractAbi, wallet);
 
-
 export const rewardUser = async (userAddress: string, rewardAmount: number) => {
     try {
-        // Call the reward function from your smart contract
-        const tx = await rewardContract.reward(userAddress, rewardAmount);
+        // Define transaction overrides (optional)
+        const overrides = {
+            // If you want to specify a gas limit
+            gasLimit: ethers.utils.hexlify(100000), // Example gas limit, adjust as needed
+            // For EIP-1559 transactions, you can specify maxFeePerGas and maxPriorityFeePerGas
+            maxFeePerGas: ethers.utils.parseUnits('200', 'gwei'),
+            maxPriorityFeePerGas: ethers.utils.parseUnits('2', 'gwei'), // Example max priority fee per gas
+            // Other overrides can be added here as needed
+        };
+
+        // Call the reward function from your smart contract with overrides
+        const tx = await rewardContract.reward(userAddress, rewardAmount, overrides);
         console.log('Transaction submitted:', tx.hash);
 
         // Wait for the transaction to be mined
