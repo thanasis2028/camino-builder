@@ -1,40 +1,67 @@
-import dotenv from 'dotenv';
-import Web3 from 'web3';
-import path from 'path';
-import ethers from 'ethers';
+import express from 'express';
+import { Pool } from 'pg';
+import cors from 'cors';
+import { rewardUser } from './reward';
 
-dotenv.config();
+const app = express();
+app.use(express.json());
 
-export const PRIVATE_KEY = process.env.PRIVATE_KEY;
-export const NETWORK_URL = process.env.NETWORK_URL;
-export const REWARD_CONTRACT_ADDRESS = process.env.REWARD_CONTRACT_ADDRESS;
+// Allow cross-origin requests
+app.use(cors());
 
-if (!PRIVATE_KEY || !NETWORK_URL || !REWARD_CONTRACT_ADDRESS) {
-    throw new Error('Please make sure you have a .env file with the required variables.');
-}
+// Create connection pool to PostgreSQL
+const pool = new Pool({
+    host: 'localhost',
+    user: 'thanasis',
+    // password: 'yourpassword',
+    database: 'onions',
+    port: 5432,
+});
 
-const web3 = new Web3(NETWORK_URL);
-const contractName = 'Reward'; // Replace with your contract's name
-const artifactsDir = path.join(__dirname, 'artifacts', 'contracts', `${contractName}.sol`);
-const contractArtifact = require(path.join(artifactsDir, `${contractName}.json`));
-
-const rewardContractAbi = contractArtifact.abi;
-const provider = new ethers.providers.JsonRpcProvider(NETWORK_URL);
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-const rewardContract = new ethers.Contract(REWARD_CONTRACT_ADDRESS, rewardContractAbi, wallet);
-
-
-export const rewardUser = async (userAddress: string, rewardAmount: number) => {
+// Get all events
+app.get('/api/events', async (req: express.Request, res: express.Response) => {
     try {
-        // Call the reward function from your smart contract
-        const tx = await rewardContract.reward(userAddress, rewardAmount);
-        console.log('Transaction submitted:', tx.hash);
-
-        // Wait for the transaction to be mined
-        await tx.wait();
-        console.log('Tokens rewarded to user:', userAddress);
-    } catch (error) {
-        console.error('Transaction failed:', error);
-        throw error;
+        const results = await pool.query('SELECT * FROM events');
+        res.send(results.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error');
     }
-};
+});
+
+app.post('/api/book_event', async (req: express.Request, res: express.Response) => {
+    try {
+        console.log(req);
+        const { eventId, userAddress } = req.body;
+
+        if (!eventId) {
+            return res.status(400).send('Event ID is required');
+        }
+
+        // Assuming bookEvent is an async function that takes an event ID
+        await bookEvent(userAddress, eventId);
+        res.send();
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server error');
+    }
+});
+
+app.use(express.static('public'));
+
+app.listen(3000, () => {
+    console.log('Server started on port 3000');
+});
+
+async function bookEvent(userAddress: string, eventId: number) {
+    const event = await pool.query('SELECT * FROM events WHERE id = $1', [eventId]);
+
+    if (event.rows.length === 0) {
+        throw new Error(`Event with ID ${eventId} not found`);
+    }
+
+    const reward = event.rows[0].reward;
+    // TODO
+    console.log(`rewardUser(${userAddress}, ${reward})`)
+    rewardUser(userAddress, reward);
+}
