@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Event Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <h1>Events</h1>
+  <div id="events"></div>
+
+  <script>
+    $(document).ready(function () {
+      $.get('/api/events', function (data) {
+        data.forEach(event => {
+          const listItem = $(`
+            <li>
+              <div class="name">${event.name}</div>
+              <div class="description">${event.description}</div>
+              <div class="price">${event.price} €</div>
+              <div class="name">${event.reward / Math.pow(10, 18)} GOT</div>
+            </li>`
+          );
+
+          listItem.click(function () {
+            const userAddress = $('#user_address').val();
+            if (!userAddress) {
+              alert('Please enter user address');
+              return;
+            }
+
+            // Send post request on click
+            $.ajax({
+              url: '/api/book_event',
+              type: 'POST',
+              contentType: 'application/json', // Specify that we're sending JSON
+              data: JSON.stringify({ eventId: event.id, userAddress: userAddress }), // Convert the JavaScript object to a JSON string
+              success: function (response) {
+                window.location.href = "/success.html";
+              }
+            });
+          });
+
+          $('#events').append(listItem);
+        });
+      });
+    });
+  </script>
+  <h2>User Address</h2>
+  <input id="user_address"></input>
+</body>
+
+</html>

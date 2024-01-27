@@ -1,0 +1,31 @@
+body {
+    font-family: Arial, sans-serif;
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+li {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+li:hover {
+    background-color: #f5f5f5; /* Changes the background color when hovering over the li */
+    transition: background-color 0.3s ease; /* Smooth transition effect */
+}
+li:active {
+    background-color: #ddd; /* Changes the background color when the li is being clicked */
+}
+.name {
+    font-size: 18px;
+    font-weight: bold;
+}
+.description {
+    font-size: 14px;
+}
+.price, .reward {
+    font-size: 16px;
+}
