@@ -18,11 +18,10 @@ if (!PRIVATE_KEY || !NETWORK_URL || !REWARD_CONTRACT_ADDRESS || !EVENT_MANAGER_C
 const provider = new ethers.providers.JsonRpcProvider(NETWORK_URL);
 const web3 = new Web3(NETWORK_URL);
 const signer = provider.getSigner();
-const contractName = 'RewardToken'; // Replace with your contract's name
-const artifactsDir = path.join(__dirname,  'artifacts', 'contracts', 'RewardToken.sol');
-const contractArtifact = require(path.join(artifactsDir, `${contractName}.json`));
-const eventManagerAbi = require(path.join(artifactsDir, 'SustainabilityEventManager.json')).abi;
-const milestoneNftAbi = require(path.join(artifactsDir, 'SustainabilityMilestoneNFT.json')).abi;
+const artifactsDir = path.join(__dirname,  'artifacts', 'contracts');
+const contractArtifact = require(path.join(artifactsDir, 'RewardToken.sol', 'RewardToken.json'));
+const eventManagerAbi = require(path.join(artifactsDir, 'SustainabilityEventManager.sol', 'SustainabilityEventManager.json')).abi;
+const milestoneNftAbi = require(path.join(artifactsDir, 'SustainabilityMilestoneNFT.sol', 'SustainabilityMilestoneNFT.json')).abi;
 
 const rewardContractAbi = contractArtifact.abi;
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);

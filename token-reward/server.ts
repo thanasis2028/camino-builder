@@ -1,7 +1,13 @@
 import express from 'express';
 import { Pool } from 'pg';
 import cors from 'cors';
-import { rewardUser } from './reward';
+import { rewardUser } from './caminoUtil';
+
+export const DB_USER = process.env.DB_USER;
+
+if (!DB_USER) {
+    throw new Error('Please make sure you have a .env file with the required variables.');
+}
 
 const app = express();
 app.use(express.json());
@@ -12,8 +18,7 @@ app.use(cors());
 // Create connection pool to PostgreSQL
 const pool = new Pool({
     host: 'localhost',
-    user: 'gni',
-    // password: 'yourpassword',
+    user: DB_USER,
     database: 'onions',
     port: 5432,
 });
