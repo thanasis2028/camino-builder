@@ -1,23 +1,33 @@
-import {ethers} from "hardhat"
+// deploy.ts
+import { ethers } from "hardhat";
 
 async function main() {
-    // Creating an instance of Contract Factory. Think of it as making a blueprint. In line 10
-    // we are addressing this blueprint to deploy the actual contract.
-    // const Reward = await ethers.getContractFactory("RewardToken");
-    // Tokens use denomination in decimals, by default it is 18 (e.g. input of 1 * 10 ** 18 = 1 token)
-    // ethers.utils.parseEther is basically adding 18 decimals to the number you input.
-    // const reward = await Reward.deploy();
+  // Deploy the RewardToken contract
+  const RewardToken = await ethers.getContractFactory("RewardToken");
+  const rewardToken = await RewardToken.deploy();
+  await rewardToken.deployed();
+  console.log("RewardToken deployed to:", rewardToken.address);
 
-    // await reward.deployed();
-    
-    console.log(
-      // "Reward deployed to:", reward.address
-    )
+  // Deploy the SustainabilityMilestoneNFT contract
+  const SustainabilityMilestoneNFT = await ethers.getContractFactory("SustainabilityMilestoneNFT");
+  const milestoneNFT = await SustainabilityMilestoneNFT.deploy();
+  await milestoneNFT.deployed();
+  console.log("SustainabilityMilestoneNFT deployed to:", milestoneNFT.address);
+
+  // Deploy the SustainabilityEventManager contract with the addresses of the RewardToken and SustainabilityMilestoneNFT contracts
+  const SustainabilityEventManager = await ethers.getContractFactory("SustainabilityEventManager");
+  const eventManager = await SustainabilityEventManager.deploy(rewardToken.address, milestoneNFT.address);
+  await eventManager.deployed();
+  console.log("SustainabilityEventManager deployed to:", eventManager.address);
+
+  // Grant the REWARDER_ROLE to the SustainabilityEventManager contract
+  const REWARDER_ROLE = await rewardToken.REWARDER_ROLE();
+  const grantRoleTx = await rewardToken.grantRole(REWARDER_ROLE, eventManager.address);
+  await grantRoleTx.wait();
+  console.log("SustainabilityEventManager granted REWARDER_ROLE in RewardToken contract");
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
